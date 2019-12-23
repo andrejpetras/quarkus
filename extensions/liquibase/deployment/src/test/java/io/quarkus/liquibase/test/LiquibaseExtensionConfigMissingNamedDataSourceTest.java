@@ -1,0 +1,39 @@
+package io.quarkus.liquibase.test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.UnsatisfiedResolutionException;
+import javax.inject.Inject;
+
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
+import io.quarkus.liquibase.Liquibase;
+import io.quarkus.liquibase.LiquibaseDataSource;
+import io.quarkus.test.QuarkusUnitTest;
+
+/**
+ * Liquibase needs a datasource to work.
+ * This tests assures, that an error occurs, as soon as a named liquibase configuration points to an missing datasource.
+ */
+public class LiquibaseExtensionConfigMissingNamedDataSourceTest {
+
+    @Inject
+    @LiquibaseDataSource("users")
+    Instance<Liquibase> liquibase;
+
+    @RegisterExtension
+    static final QuarkusUnitTest config = new QuarkusUnitTest()
+            .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
+                    .addAsResource("config-for-missing-named-datasource.properties", "application.properties"));
+
+    @Test
+    @DisplayName("Injecting liquibase should fail if the named datasource is missing")
+    public void testLiquibaseNotAvailableWithoutDataSource() {
+        assertThrows(UnsatisfiedResolutionException.class, liquibase::get);
+    }
+}

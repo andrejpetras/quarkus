@@ -129,6 +129,7 @@
 
         <!-- Database migrations -->
         <module>flyway</module>
+        <module>liquibase</module>
 
         <!-- kogito -->
         <module>kogito</module>
