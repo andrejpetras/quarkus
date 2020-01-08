@@ -1,10 +1,7 @@
 package io.quarkus.liquibase.runtime;
 
-import javax.sql.DataSource;
-
+import io.agroal.api.AgroalDataSource;
 import io.quarkus.liquibase.Liquibase;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 
 /**
  * The quarkus liquibase creator
@@ -37,8 +34,8 @@ class LiquibaseCreator {
      * @param dataSource the liquibase datasource
      * @return the corresponding quarkus liquibase instance.
      */
-    public Liquibase createLiquibase(DataSource dataSource) {
-        ResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader());
+    public Liquibase createLiquibase(AgroalDataSource dataSource) {
+
         LiquibaseConfig config = new LiquibaseConfig();
 
         config.changeLog = liquibaseBuildTimeConfig.changeLog;
@@ -54,6 +51,6 @@ class LiquibaseCreator {
         config.liquibaseCatalogName = liquibaseRuntimeConfig.liquibaseCatalogName;
         config.migrateAtStart = liquibaseRuntimeConfig.migrateAtStart;
         config.cleanAtStart = liquibaseRuntimeConfig.cleanAtStart;
-        return new Liquibase(config, resourceAccessor, dataSource);
+        return new Liquibase(config, dataSource);
     }
 }

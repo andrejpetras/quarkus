@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import io.agroal.api.AgroalDataSource;
 import io.quarkus.liquibase.runtime.LiquibaseConfig;
 import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
@@ -20,13 +21,14 @@ import liquibase.changelog.ChangeSetStatus;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.DatabaseChangeLogLock;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
 /**
@@ -45,6 +47,11 @@ public class Liquibase {
     private ResourceAccessor resourceAccessor;
 
     /**
+     * The liquibase executor instance
+     */
+    private liquibase.Liquibase executor;
+
+    /**
      * The liquibase configuration
      */
     private LiquibaseConfig config;
@@ -53,13 +60,68 @@ public class Liquibase {
      * The default constructor
      * 
      * @param config the liquibase configuration
-     * @param resourceAccessor the resource accessor
      * @param datasource the datasource for this liquibase bean
      */
-    public Liquibase(LiquibaseConfig config, ResourceAccessor resourceAccessor, DataSource datasource) {
+    public Liquibase(LiquibaseConfig config, AgroalDataSource datasource) {
         this.dataSource = datasource;
-        this.resourceAccessor = resourceAccessor;
+        this.resourceAccessor = new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader());
         this.config = config;
+
+        Database database = null;
+        if (datasource != null) {
+            try {
+                Class<?> driverClass = datasource.getConfiguration()
+                        .connectionPoolConfiguration()
+                        .connectionFactoryConfiguration()
+                        .connectionProviderClass();
+                database = guessDatabase(driverClass.getName());
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+
+            if (database != null) {
+                database.setDatabaseChangeLogLockTableName(config.databaseChangeLogLockTableName);
+                database.setDatabaseChangeLogTableName(config.databaseChangeLogTableName);
+                config.currentDateTimeFunction.ifPresent(database::setCurrentDateTimeFunction);
+                config.liquibaseCatalogName.ifPresent(database::setLiquibaseCatalogName);
+                config.liquibaseSchemaName.ifPresent(database::setLiquibaseSchemaName);
+                config.liquibaseTablespaceName.ifPresent(database::setLiquibaseTablespaceName);
+
+                try {
+                    if (config.defaultCatalogName.isPresent()) {
+                        database.setDefaultCatalogName(config.defaultCatalogName.get());
+                    }
+                    if (config.defaultSchemaName.isPresent()) {
+                        database.setDefaultSchemaName(config.defaultSchemaName.get());
+                    }
+                } catch (DatabaseException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+        }
+        executor = new liquibase.Liquibase(config.changeLog, resourceAccessor, database);
+    }
+
+    private Database guessDatabase(String resolvedDriver) {
+        if (resolvedDriver.contains("postgresql")) {
+            return new PostgresDatabase();
+        }
+        if (resolvedDriver.contains("org.h2.Driver")) {
+            return new H2Database();
+        }
+        if (resolvedDriver.contains("org.mariadb.jdbc.Driver")) {
+            return new MariaDBDatabase();
+        }
+        if (resolvedDriver.contains("com.mysql.cj.jdbc.Driver")) {
+            return new MySQLDatabase();
+        }
+        if (resolvedDriver.contains("org.apache.derby.jdbc.ClientDriver")) {
+            return new DerbyDatabase();
+        }
+        if (resolvedDriver.contains("microsoft")) {
+            return new MSSQLDatabase();
+        }
+        return null;
     }
 
     /**
@@ -818,39 +880,6 @@ public class Liquibase {
     }
 
     /**
-     * Creates the liquibase
-     * 
-     * @param con the database connection
-     * @return the corresponding liquibase instance
-     * @throws DatabaseException if the method fails
-     */
-    private liquibase.Liquibase createLiquibase(Connection con) throws DatabaseException {
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(con));
-        database.setDatabaseChangeLogLockTableName(config.databaseChangeLogLockTableName);
-        database.setDatabaseChangeLogTableName(config.databaseChangeLogTableName);
-        config.currentDateTimeFunction.ifPresent(database::setCurrentDateTimeFunction);
-        config.liquibaseCatalogName.ifPresent(database::setLiquibaseCatalogName);
-        config.liquibaseSchemaName.ifPresent(database::setLiquibaseSchemaName);
-        config.liquibaseTablespaceName.ifPresent(database::setLiquibaseTablespaceName);
-
-        config.defaultCatalogName.ifPresent(d -> {
-            try {
-                database.setDefaultCatalogName(d);
-            } catch (DatabaseException ex) {
-                throw new IllegalStateException(ex);
-            }
-        });
-        config.defaultSchemaName.ifPresent(d -> {
-            try {
-                database.setDefaultSchemaName(d);
-            } catch (DatabaseException ex) {
-                throw new IllegalStateException(ex);
-            }
-        });
-        return new liquibase.Liquibase(config.changeLog, resourceAccessor, database);
-    }
-
-    /**
      * The liquibase function
      * 
      * @param <Liquibase> the liquibase instance
@@ -867,15 +896,14 @@ public class Liquibase {
      */
     private <R> R executeFunction(LiquibaseFunction<liquibase.Liquibase, R> function) throws LiquibaseException {
         Connection connection = null;
-        liquibase.Liquibase liquibase = null;
         try {
             connection = dataSource.getConnection();
-            liquibase = createLiquibase(connection);
-            return function.apply(liquibase);
+            executor.getDatabase().setConnection(new JdbcConnection(connection));
+            return function.apply(executor);
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
-            closeLiquibase(liquibase, connection);
+            closeLiquibase(connection);
         }
     }
 
@@ -896,28 +924,26 @@ public class Liquibase {
      */
     private void executeConsumer(LiquibaseConsumer<liquibase.Liquibase> consumer) throws LiquibaseException {
         Connection connection = null;
-        liquibase.Liquibase liquibase = null;
         try {
             connection = dataSource.getConnection();
-            liquibase = createLiquibase(connection);
-            consumer.apply(liquibase);
+            executor.getDatabase().setConnection(new JdbcConnection(connection));
+            consumer.apply(executor);
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
-            closeLiquibase(liquibase, connection);
+            closeLiquibase(connection);
         }
     }
 
     /**
      * Close the database connection for the liquibase instance.
-     * 
-     * @param liquibase the liquibase instance
+     *
      * @param con the database connection
      * @throws LiquibaseException if the method fails
      */
-    private void closeLiquibase(liquibase.Liquibase liquibase, Connection con) throws LiquibaseException {
-        if (liquibase != null && liquibase.getDatabase() != null) {
-            liquibase.getDatabase().close();
+    private void closeLiquibase(Connection con) throws LiquibaseException {
+        if (executor != null && executor.getDatabase() != null) {
+            executor.getDatabase().close();
         } else if (con != null) {
             try {
                 if (!con.getAutoCommit()) {

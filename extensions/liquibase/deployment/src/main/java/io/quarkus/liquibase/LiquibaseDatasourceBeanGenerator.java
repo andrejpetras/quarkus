@@ -14,6 +14,7 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 
+import io.agroal.api.AgroalDataSource;
 import io.quarkus.arc.deployment.GeneratedBeanBuildItem;
 import io.quarkus.arc.processor.DotNames;
 import io.quarkus.deployment.annotations.BuildProducer;
@@ -107,7 +108,7 @@ class LiquibaseDatasourceBeanGenerator {
     }
 
     private static MethodDescriptor createLiquibaseMethod() {
-        Class<?>[] parameterTypes = { DataSource.class, String.class };
+        Class<?>[] parameterTypes = { AgroalDataSource.class, String.class };
         return MethodDescriptor.ofMethod(LiquibaseProducer.class, "createLiquibase", Liquibase.class, parameterTypes);
     }
 

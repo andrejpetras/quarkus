@@ -6,8 +6,8 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
-import javax.sql.DataSource;
 
+import io.agroal.api.AgroalDataSource;
 import io.quarkus.liquibase.Liquibase;
 
 /**
@@ -26,7 +26,7 @@ public class LiquibaseProducer {
      */
     @Inject
     @Default
-    Instance<DataSource> defaultDataSource;
+    Instance<AgroalDataSource> defaultDataSource;
 
     /**
      * The liquibase runtime configuration
@@ -74,7 +74,7 @@ public class LiquibaseProducer {
      * @param dataSource the datasource instance
      * @return the corresponding quarkus liquibase instance
      */
-    private Liquibase createDefaultLiquibase(DataSource dataSource) {
+    private Liquibase createDefaultLiquibase(AgroalDataSource dataSource) {
         return new LiquibaseCreator(getLiquibaseRuntimeConfig().defaultDataSource, getLiquibaseBuildConfig().defaultDataSource)
                 .createLiquibase(dataSource);
     }
@@ -86,7 +86,7 @@ public class LiquibaseProducer {
      * @param dataSourceName the datasource name
      * @return the corresponding quarkus liquibase instance
      */
-    public Liquibase createLiquibase(DataSource dataSource, String dataSourceName) {
+    public Liquibase createLiquibase(AgroalDataSource dataSource, String dataSourceName) {
         return new LiquibaseCreator(getLiquibaseRuntimeConfig().getConfigForDataSourceName(dataSourceName),
                 getLiquibaseBuildConfig().getConfigForDataSourceName(dataSourceName))
                         .createLiquibase(dataSource);
