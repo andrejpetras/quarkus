@@ -8,7 +8,8 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
-import io.quarkus.liquibase.Liquibase;
+import io.quarkus.liquibase.LiquibaseContext;
+import io.quarkus.liquibase.LiquibaseFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSetStatus;
 import liquibase.exception.LiquibaseException;
@@ -19,12 +20,12 @@ import liquibase.exception.LiquibaseException;
 public class LiquibaseFunctionalityResource {
 
     @Inject
-    Liquibase liquibase;
+    LiquibaseFactory liquibaseFactory;
 
     @GET
     @Path("update")
     public String doUpdateAuto() {
-        try {
+        try (LiquibaseContext liquibase = liquibaseFactory.createContext()) {
             liquibase.update();
             List<ChangeSetStatus> status = liquibase.getChangeSetStatuses();
             List<ChangeSetStatus> changeSets = Objects.requireNonNull(status,

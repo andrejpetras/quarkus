@@ -12,7 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import io.quarkus.liquibase.Liquibase;
+import io.quarkus.liquibase.LiquibaseFactory;
 import io.quarkus.test.QuarkusUnitTest;
 
 /**
@@ -23,7 +23,7 @@ import io.quarkus.test.QuarkusUnitTest;
 public class LiquibaseExtensionConfigEmptyTest {
 
     @Inject
-    Instance<Liquibase> liquibase;
+    Instance<LiquibaseFactory> liquibase;
 
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()

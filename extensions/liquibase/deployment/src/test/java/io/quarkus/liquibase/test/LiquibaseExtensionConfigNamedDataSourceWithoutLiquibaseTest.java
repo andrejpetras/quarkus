@@ -12,8 +12,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.agroal.api.AgroalDataSource;
 import io.quarkus.agroal.DataSource;
-import io.quarkus.liquibase.Liquibase;
 import io.quarkus.liquibase.LiquibaseDataSource;
+import io.quarkus.liquibase.LiquibaseFactory;
 import io.quarkus.test.QuarkusUnitTest;
 
 /**
@@ -24,7 +24,7 @@ public class LiquibaseExtensionConfigNamedDataSourceWithoutLiquibaseTest {
 
     @Inject
     @LiquibaseDataSource("users")
-    Liquibase liquibase;
+    LiquibaseFactory liquibaseFactory;
 
     @Inject
     LiquibaseExtensionConfigFixture fixture;
@@ -37,12 +37,13 @@ public class LiquibaseExtensionConfigNamedDataSourceWithoutLiquibaseTest {
     static final QuarkusUnitTest config = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
                     .addClass(LiquibaseExtensionConfigFixture.class)
+                    .addAsResource("db/changeLog.xml", "db/changeLog.xml")
                     .addAsResource("config-for-named-datasource-without-liquibase.properties", "application.properties"));
 
     @Test
     @DisplayName("Reads predefined default liquibase configuration for named datasource correctly")
     public void testLiquibaseDefaultConfigInjection() throws Exception {
-        fixture.assertDefaultConfigurationSettings(liquibase.getConfiguration());
+        fixture.assertDefaultConfigurationSettings(liquibaseFactory.getConfiguration());
         assertFalse(fixture.migrateAtStart("users"));
     }
 }

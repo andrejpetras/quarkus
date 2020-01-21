@@ -18,7 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.agroal.api.AgroalDataSource;
-import io.quarkus.liquibase.Liquibase;
+import io.quarkus.liquibase.LiquibaseContext;
+import io.quarkus.liquibase.LiquibaseFactory;
 import io.quarkus.test.QuarkusUnitTest;
 import liquibase.changelog.ChangeSetStatus;
 import liquibase.exception.LiquibaseException;
@@ -26,7 +27,7 @@ import liquibase.exception.LiquibaseException;
 public class LiquibaseExtensionCleanAndMigrateAtStartTest {
 
     @Inject
-    Liquibase liquibase;
+    LiquibaseFactory liquibaseFactory;
 
     @Inject
     AgroalDataSource defaultDataSource;
@@ -34,6 +35,7 @@ public class LiquibaseExtensionCleanAndMigrateAtStartTest {
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
+                    .addAsResource("db/changeLog.xml", "db/changeLog.xml")
                     .addAsResource("clean-and-migrate-at-start-config.properties", "application.properties"));
 
     @Test
@@ -48,9 +50,11 @@ public class LiquibaseExtensionCleanAndMigrateAtStartTest {
                 // expected fake_existing_tbl does not exist
             }
         }
-        List<ChangeSetStatus> status = liquibase.getChangeSetStatuses();
-        assertNotNull(status, "Status is null");
-        assertEquals(1, status.size(), "The set of changes is not null");
-        assertFalse(status.get(0).getWillRun());
+        try (LiquibaseContext liquibase = liquibaseFactory.createContext()) {
+            List<ChangeSetStatus> status = liquibase.getChangeSetStatuses();
+            assertNotNull(status, "Status is null");
+            assertEquals(1, status.size(), "The set of changes is not null");
+            assertFalse(status.get(0).getWillRun());
+        }
     }
 }

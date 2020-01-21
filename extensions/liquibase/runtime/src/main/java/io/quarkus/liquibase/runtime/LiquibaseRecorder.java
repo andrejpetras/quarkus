@@ -8,8 +8,9 @@ import javax.enterprise.util.AnnotationLiteral;
 
 import io.quarkus.arc.runtime.BeanContainer;
 import io.quarkus.arc.runtime.BeanContainerListener;
-import io.quarkus.liquibase.Liquibase;
+import io.quarkus.liquibase.LiquibaseContext;
 import io.quarkus.liquibase.LiquibaseDataSource;
+import io.quarkus.liquibase.LiquibaseFactory;
 import io.quarkus.runtime.annotations.Recorder;
 import liquibase.exception.LiquibaseException;
 
@@ -83,8 +84,10 @@ public class LiquibaseRecorder {
      * @throws LiquibaseException if the database actions fails
      */
     private void dropAll(BeanContainer container, AnnotationLiteral<? extends Annotation> qualifier) throws LiquibaseException {
-        Liquibase liquibase = container.instance(Liquibase.class, qualifier);
-        liquibase.dropAll();
+        LiquibaseFactory liquibaseFactory = container.instance(LiquibaseFactory.class, qualifier);
+        try (LiquibaseContext context = liquibaseFactory.createContext()) {
+            context.dropAll();
+        }
     }
 
     /**
@@ -95,8 +98,10 @@ public class LiquibaseRecorder {
      * @throws LiquibaseException if the database actions fails
      */
     private void migrate(BeanContainer container, AnnotationLiteral<? extends Annotation> qualifier) throws LiquibaseException {
-        Liquibase liquibase = container.instance(Liquibase.class, qualifier);
-        liquibase.update();
+        LiquibaseFactory liquibaseFactory = container.instance(LiquibaseFactory.class, qualifier);
+        try (LiquibaseContext context = liquibaseFactory.createContext()) {
+            context.update();
+        }
     }
 
     /**
@@ -108,7 +113,9 @@ public class LiquibaseRecorder {
      */
     private void validate(BeanContainer container, AnnotationLiteral<? extends Annotation> qualifier)
             throws LiquibaseException {
-        Liquibase liquibase = container.instance(Liquibase.class, qualifier);
-        liquibase.validate();
+        LiquibaseFactory liquibaseFactory = container.instance(LiquibaseFactory.class, qualifier);
+        try (LiquibaseContext context = liquibaseFactory.createContext()) {
+            context.validate();
+        }
     }
 }

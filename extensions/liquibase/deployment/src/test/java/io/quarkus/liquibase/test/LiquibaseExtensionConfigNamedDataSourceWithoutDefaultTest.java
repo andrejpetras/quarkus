@@ -10,8 +10,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import io.quarkus.liquibase.Liquibase;
 import io.quarkus.liquibase.LiquibaseDataSource;
+import io.quarkus.liquibase.LiquibaseFactory;
 import io.quarkus.test.QuarkusUnitTest;
 
 /**
@@ -24,12 +24,15 @@ public class LiquibaseExtensionConfigNamedDataSourceWithoutDefaultTest {
 
     @Inject
     @LiquibaseDataSource("users")
-    Liquibase liquibaseUsers;
+    LiquibaseFactory liquibaseUsers;
 
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
                     .addClass(LiquibaseExtensionConfigFixture.class)
+                    .addAsResource("db/xml/changeLog.xml")
+                    .addAsResource("db/xml/create-tables.xml")
+                    .addAsResource("db/xml/test/test.xml")
                     .addAsResource("config-for-named-datasource-without-default.properties", "application.properties"));
 
     @Test

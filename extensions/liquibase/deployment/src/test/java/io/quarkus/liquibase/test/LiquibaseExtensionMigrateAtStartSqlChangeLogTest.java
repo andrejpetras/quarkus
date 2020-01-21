@@ -12,29 +12,33 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import io.quarkus.liquibase.Liquibase;
+import io.quarkus.liquibase.LiquibaseContext;
+import io.quarkus.liquibase.LiquibaseFactory;
 import io.quarkus.test.QuarkusUnitTest;
 import liquibase.changelog.ChangeSetStatus;
 
 public class LiquibaseExtensionMigrateAtStartSqlChangeLogTest {
     // Quarkus built object
     @Inject
-    Liquibase liquibase;
+    LiquibaseFactory liquibaseFactory;
 
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
+                    .addAsResource("db/sql/changeLog.sql")
                     .addAsResource("migrate-at-start-sql-config.properties", "application.properties"));
 
     @Test
     @DisplayName("Migrates at start with change log config correctly")
     public void testLiquibaseSqlChangeLog() throws Exception {
-        List<ChangeSetStatus> status = liquibase.getChangeSetStatuses();
-        assertNotNull(status);
-        assertEquals(2, status.size());
-        assertFalse(status.get(0).getWillRun());
-        assertEquals(status.get(0).getChangeSet().getId(), "create-tables-1");
-        assertFalse(status.get(1).getWillRun());
-        assertEquals(status.get(1).getChangeSet().getId(), "test-1");
+        try (LiquibaseContext liquibase = liquibaseFactory.createContext()) {
+            List<ChangeSetStatus> status = liquibase.getChangeSetStatuses();
+            assertNotNull(status);
+            assertEquals(2, status.size());
+            assertFalse(status.get(0).getWillRun());
+            assertEquals(status.get(0).getChangeSet().getId(), "create-tables-1");
+            assertFalse(status.get(1).getWillRun());
+            assertEquals(status.get(1).getChangeSet().getId(), "test-1");
+        }
     }
 }

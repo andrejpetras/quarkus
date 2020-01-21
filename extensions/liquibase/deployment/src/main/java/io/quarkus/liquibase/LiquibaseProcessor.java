@@ -4,7 +4,13 @@ import static io.quarkus.deployment.annotations.ExecutionTime.STATIC_INIT;
 import static io.quarkus.liquibase.runtime.graal.LiquibaseServiceLoader.serviceResourceFile;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,7 +31,10 @@ import io.quarkus.deployment.builditem.CapabilityBuildItem;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.deployment.builditem.GeneratedResourceBuildItem;
 import io.quarkus.deployment.builditem.ServiceStartBuildItem;
-import io.quarkus.deployment.builditem.nativeimage.*;
+import io.quarkus.deployment.builditem.nativeimage.NativeImageResourceBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.NativeImageResourceBundleBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.RuntimeInitializedClassBuildItem;
 import io.quarkus.liquibase.runtime.LiquibaseBuildTimeConfig;
 import io.quarkus.liquibase.runtime.LiquibaseProducer;
 import io.quarkus.liquibase.runtime.LiquibaseRecorder;
@@ -187,7 +196,7 @@ class LiquibaseProcessor {
      * native resource (text file) which contains all the implementation classes.
      * The native resource name {@link LiquibaseServiceLoader#serviceResourceFile(Class)}
      * and to the generated text file list which is add to the native image.
-     * 
+     *
      * @param reflective the reflective producer
      * @param generatedResourceProducer the generated resource producer
      * @param resourceProducer the resource producer
@@ -214,7 +223,7 @@ class LiquibaseProcessor {
 
     /**
      * Add the reflection for the liquibase class interface and all the implementation of the interface
-     * 
+     *
      * @param reflective the reflective build producer
      * @param methods the method flag
      * @param className the interface class
@@ -261,7 +270,7 @@ class LiquibaseProcessor {
 
     /**
      * Finds all changes for the change log file
-     * 
+     *
      * @param file the change log file
      * @param classLoaderResourceAccessor the liquibase class loader resource accessor
      * @param changeLogParameters the liquibase change log parameters

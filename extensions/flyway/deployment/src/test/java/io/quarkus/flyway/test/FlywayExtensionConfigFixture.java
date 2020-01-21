@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Disabled;
  * This fixture provides access to read the expected and the actual configuration of flyway.
  * It also provides a method combining all assertions to be reused for multiple tests.
  */
-@Disabled
 @ApplicationScoped
 public class FlywayExtensionConfigFixture {
 

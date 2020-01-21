@@ -105,23 +105,26 @@ Now you can start your application and Quarkus will run the Liquibase's update m
 
 [source,java]
 --
-import org.quarkus.liquibase.Liquibase <1>
+import org.quarkus.liquibase.LiquibaseFactory; <1>
+import org.quarkus.liquibase.LiquibaseContext;
 
 @ApplicationScoped
 public class MigrationService {
     // You can Inject the object if you want to use it manually
     @Inject
-    Liquibase liquibase; <2>
+    LiquibaseFactory liquibaseFactory; <2>
 
     public void checkMigration() {
         // Get the list of liquibase change set statuses
-        List<ChangeSetStatus> status = liquibase.getChangeSetStatuses();
+        try (LiquibaseContext liquibase = liquibaseFactory.createContext()) {
+            List<ChangeSetStatus> status = liquibase.getChangeSetStatuses();
+        }
     }
 }
 --
 
 <1> The Quarkus extension wraps the Liquibase object in its own implementation
-<2> Inject the Quarkus liquibase object if you want to use the liquibase methods directly
+<2> Inject the Quarkus liquibase factory if you want to use the liquibase methods directly
 
 == Multiple datasources
 
@@ -173,37 +176,37 @@ NOTE: Without configuration, Liquibase is set up for every datasource using the 
 
 In case you are interested in using the `Liquibase` object directly, you can inject it as follows:
 
-NOTE: The Liquibase object is the instance of the org.quarkus.liquibase.Liquibase class. This kind of wrapper object to handle the
-JDBC connection for the liquibase.Liquibase object. The instance open and close the database connection for each method separately.
-
 NOTE: If you enabled the `quarkus.liquibase.migrate-at-start` property, by the time you use the Liquibase instance,
 Quarkus will already have run the migrate operation
 
 [source,java]
 --
-import org.quarkus.liquibase.Liquibase
+import org.quarkus.liquibase.LiquibaseFactory;
+import org.quarkus.liquibase.LiquibaseContext;
 
 @ApplicationScoped
 public class MigrationService {
     // You can Inject the object if you want to use it manually
     @Inject
-    Liquibase liquibase; <1>
+    LiquibaseFactory liquibaseFactory; <1>
 
     @Inject
     @LiquibaseDataSource("inventory") <2>
-    Liquibase liquibaseForInventory;
+    LiquibaseFactory liquibaseFactoryForInventory;
 
     @Inject
     @Named("liquibase_users") <3>
-    Liquibase liquibaseForUsers;
+    LiquibaseFactory liquibaseFactoryForUsers;
 
     public void checkMigration() {
         // Use the liquibase instance manually
-        liquibase.dropAll(); <4>
-        liquibase.validate();
-        liquibase.update();
-        // Get the list of liquibase change set statuses
-        List<ChangeSetStatus> status = liquibase.getChangeSetStatuses(); <5>
+        try (LiquibaseContext liquibase = liquibaseFactory.createContext()) {
+            liquibase.dropAll(); <4>
+            liquibase.validate();
+            liquibase.update();
+            // Get the list of liquibase change set statuses
+            List<ChangeSetStatus> status = liquibase.getChangeSetStatuses(); <5>
+        }
     }
 }
 --

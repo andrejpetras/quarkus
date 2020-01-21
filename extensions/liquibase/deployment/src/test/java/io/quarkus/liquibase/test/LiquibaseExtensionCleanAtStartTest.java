@@ -19,7 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.agroal.api.AgroalDataSource;
-import io.quarkus.liquibase.Liquibase;
+import io.quarkus.liquibase.LiquibaseContext;
+import io.quarkus.liquibase.LiquibaseFactory;
 import io.quarkus.test.QuarkusUnitTest;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSetStatus;
@@ -28,7 +29,7 @@ import liquibase.exception.LiquibaseException;
 public class LiquibaseExtensionCleanAtStartTest {
 
     @Inject
-    Liquibase liquibase;
+    LiquibaseFactory liquibaseFactory;
 
     @Inject
     AgroalDataSource defaultDataSource;
@@ -36,6 +37,7 @@ public class LiquibaseExtensionCleanAtStartTest {
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
+                    .addAsResource("db/changeLog.xml", "db/changeLog.xml")
                     .addAsResource("clean-at-start-config.properties", "application.properties"));
 
     @Test
@@ -50,13 +52,15 @@ public class LiquibaseExtensionCleanAtStartTest {
             }
         }
 
-        List<ChangeSetStatus> status = liquibase.getChangeSetStatuses();
-        assertNotNull(status, "Status is null");
-        assertEquals(1, status.size(), "The set of changes is not null");
-        assertTrue(status.get(0).getWillRun());
+        try (LiquibaseContext liquibase = liquibaseFactory.createContext()) {
+            List<ChangeSetStatus> status = liquibase.getChangeSetStatuses();
+            assertNotNull(status, "Status is null");
+            assertEquals(1, status.size(), "The set of changes is not null");
+            assertTrue(status.get(0).getWillRun());
 
-        List<ChangeSet> unrun = liquibase.listUnrunChangeSets();
-        assertNotNull(unrun, "Unrun is null");
-        assertEquals(1, status.size(), "The set of unrun changes is not null");
+            List<ChangeSet> unrun = liquibase.listUnrunChangeSets();
+            assertNotNull(unrun, "Unrun is null");
+            assertEquals(1, status.size(), "The set of unrun changes is not null");
+        }
     }
 }

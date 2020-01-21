@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.agroal.api.AgroalDataSource;
-import io.quarkus.liquibase.Liquibase;
+import io.quarkus.liquibase.LiquibaseFactory;
 import io.quarkus.test.QuarkusUnitTest;
 
 /**
@@ -21,7 +21,7 @@ import io.quarkus.test.QuarkusUnitTest;
 public class LiquibaseExtensionConfigDefaultDataSourceWithoutLiquibaseTest {
 
     @Inject
-    Liquibase liquibase;
+    LiquibaseFactory liquibase;
 
     @Inject
     LiquibaseExtensionConfigFixture fixture;
@@ -33,6 +33,7 @@ public class LiquibaseExtensionConfigDefaultDataSourceWithoutLiquibaseTest {
     static final QuarkusUnitTest config = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
                     .addClass(LiquibaseExtensionConfigFixture.class)
+                    .addAsResource("db/changeLog.xml", "db/changeLog.xml")
                     .addAsResource("config-for-default-datasource-without-liquibase.properties", "application.properties"));
 
     @Test

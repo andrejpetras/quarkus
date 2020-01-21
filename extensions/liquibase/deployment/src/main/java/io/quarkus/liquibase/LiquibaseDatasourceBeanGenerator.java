@@ -29,12 +29,12 @@ import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.liquibase.runtime.LiquibaseProducer;
 
 /**
- * Generates the CDI producer bean for {@link Liquibase} at build time.<br>
+ * Generates the CDI producer bean for {@link LiquibaseFactory} at build time.<br>
  * Supports multiple named {@link DataSource}s.
  * <p>
- * It produces {@link Liquibase} instances for every {@link Named} {@link DataSource}.
+ * It produces {@link LiquibaseFactory} instances for every {@link Named} {@link DataSource}.
  * <p>
- * All {@link Liquibase} instances get named the same way as the {@link DataSource}s,
+ * All {@link LiquibaseFactory} instances get named the same way as the {@link DataSource}s,
  * prepended by the prefix {@value #LIQUIBASE_BEAN_NAME_PREFIX}.
  */
 class LiquibaseDatasourceBeanGenerator {
@@ -83,7 +83,7 @@ class LiquibaseDatasourceBeanGenerator {
             dataSourceField.addAnnotation(annotatedWithNamed(dataSourceName));
 
             String producerMethodName = "createLiquibaseForDataSource" + hashed(dataSourceName);
-            MethodCreator liquibaseProducerMethod = classCreator.getMethodCreator(producerMethodName, Liquibase.class);
+            MethodCreator liquibaseProducerMethod = classCreator.getMethodCreator(producerMethodName, LiquibaseFactory.class);
             liquibaseProducerMethod.addAnnotation(Produces.class);
             liquibaseProducerMethod.addAnnotation(Dependent.class);
             liquibaseProducerMethod.addAnnotation(annotatedWithLiquibaseDatasource(dataSourceName));
@@ -109,7 +109,7 @@ class LiquibaseDatasourceBeanGenerator {
 
     private static MethodDescriptor createLiquibaseMethod() {
         Class<?>[] parameterTypes = { AgroalDataSource.class, String.class };
-        return MethodDescriptor.ofMethod(LiquibaseProducer.class, "createLiquibase", Liquibase.class, parameterTypes);
+        return MethodDescriptor.ofMethod(LiquibaseProducer.class, "createLiquibase", LiquibaseFactory.class, parameterTypes);
     }
 
     private static ResultHandle resultHandleFor(FieldCreator field, BytecodeCreator method) {

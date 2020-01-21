@@ -10,8 +10,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import io.quarkus.liquibase.Liquibase;
 import io.quarkus.liquibase.LiquibaseDataSource;
+import io.quarkus.liquibase.LiquibaseFactory;
 import io.quarkus.test.QuarkusUnitTest;
 
 /**
@@ -24,16 +24,19 @@ public class LiquibaseExtensionConfigMultiDataSourcesWithoutDefaultTest {
 
     @Inject
     @LiquibaseDataSource("users")
-    Liquibase liquibaseUsers;
+    LiquibaseFactory liquibaseUsers;
 
     @Inject
     @LiquibaseDataSource("inventory")
-    Liquibase liquibaseInventory;
+    LiquibaseFactory liquibaseInventory;
 
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
                     .addClass(LiquibaseExtensionConfigFixture.class)
+                    .addAsResource("db/changeLog.xml")
+                    .addAsResource("db/inventory/changeLog.xml")
+                    .addAsResource("db/users/changeLog.xml")
                     .addAsResource("config-for-multiple-datasources-without-default.properties", "application.properties"));
 
     @Test
