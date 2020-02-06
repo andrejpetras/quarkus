@@ -14,6 +14,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -22,12 +23,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 
 import org.graalvm.nativeimage.ImageSingletons;
 import org.graalvm.nativeimage.hosted.Feature;
 import org.graalvm.nativeimage.hosted.RuntimeClassInitialization;
 import org.graalvm.nativeimage.hosted.RuntimeReflection;
 
+import io.quarkus.bootstrap.classloading.ClassPathElement;
+import io.quarkus.bootstrap.classloading.QuarkusClassLoader;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.DeploymentClassLoaderBuildItem;
@@ -192,11 +196,10 @@ public class NativeImageAutoFeatureStep {
             }
         }
 
-        for (NativeImageResourceBuildItem i : resources) {
-            for (String j : i.getResources()) {
-                overallCatch.invokeStaticMethod(ofMethod(ResourceHelper.class, "registerResources", void.class, String.class),
-                        overallCatch.load(j));
-            }
+        List<String> resourcesList = findResources(resources);
+        for (String resource : resourcesList) {
+            overallCatch.invokeStaticMethod(ofMethod(ResourceHelper.class, "registerResources", void.class, String.class),
+                    overallCatch.load(resource));
         }
 
         for (ServiceProviderBuildItem i : serviceProviderBuildItems) {
@@ -401,5 +404,64 @@ public class NativeImageAutoFeatureStep {
             this.finalFieldsWritable = finalFieldsWritable;
             this.weak = weak;
         }
+    }
+
+    public static List<String> findResources(List<NativeImageResourceBuildItem> nativeImageResourceBuildItems) {
+        if (nativeImageResourceBuildItems == null || nativeImageResourceBuildItems.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<String> resources = new ArrayList<>();
+
+        try {
+            Set<String> items = new HashSet<>();
+            for (NativeImageResourceBuildItem item : nativeImageResourceBuildItems) {
+                items.addAll(item.getResources());
+            }
+
+            // add all resources
+            resources.addAll(items);
+
+            // create regex patterns
+            List<Pattern> patterns = new ArrayList<>(items.size());
+            for (String item : items) {
+                patterns.add(Pattern.compile(item));
+            }
+
+            Set<String> urls = new HashSet<>();
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            if (cl instanceof QuarkusClassLoader) {
+                Field field = QuarkusClassLoader.class.getDeclaredField("elements");
+                field.setAccessible(true);
+                List<ClassPathElement> elements = (List<ClassPathElement>) field.get(cl);
+                for (ClassPathElement element : elements) {
+                    for (String r : element.getProvidedResources()) {
+                        // skip classes and directories
+                        if (!r.endsWith(".class") && !r.endsWith("/")) {
+                            urls.add(r);
+                        }
+                    }
+                }
+            }
+
+            // match classloader resources to pattern
+            for (String url : urls) {
+                if (matchPattern(patterns, url)) {
+                    resources.add(url);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load resources " + resources, e);
+        }
+        return resources;
+    }
+
+    private static boolean matchPattern(List<Pattern> patterns, String relativePath) {
+        for (Pattern pattern : patterns) {
+            if (pattern.matcher(relativePath).matches()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
