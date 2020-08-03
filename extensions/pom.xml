@@ -92,7 +92,8 @@
         <module>hibernate-orm</module>
         <module>hibernate-envers</module>
         <module>hibernate-reactive</module>
-        <module>hibernate-validator</module>
+	<module>hibernate-validator</module>
+	<module>hibernate-types</module>
         <module>panache</module>
         <module>hibernate-search-elasticsearch</module>
         <module>elasticsearch-rest-client-common</module>
