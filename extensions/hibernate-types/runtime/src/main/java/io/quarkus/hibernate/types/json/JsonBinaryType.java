@@ -7,7 +7,6 @@ import org.hibernate.usertype.DynamicParameterizedType;
 
 import io.quarkus.hibernate.types.json.impl.JsonBinarySqlTypeDescriptor;
 import io.quarkus.hibernate.types.json.impl.JsonTypeDescriptor;
-import io.quarkus.hibernate.types.json.impl.JsonWrapper;
 
 /**
  * Maps any given Java object on a JSON column type that is managed via
@@ -26,7 +25,7 @@ import io.quarkus.hibernate.types.json.impl.JsonWrapper;
 public class JsonBinaryType extends AbstractSingleColumnStandardBasicType<Object> implements DynamicParameterizedType {
 
     public JsonBinaryType() {
-        super(JsonBinarySqlTypeDescriptor.INSTANCE, new JsonTypeDescriptor(JsonWrapper.INSTANCE));
+        super(JsonBinarySqlTypeDescriptor.INSTANCE, new JsonTypeDescriptor());
     }
 
     public String getName() {

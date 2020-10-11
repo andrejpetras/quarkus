@@ -18,16 +18,13 @@ public class JsonTypeDescriptor extends AbstractTypeDescriptor<Object> implement
 
     private Type type;
 
-    private JsonWrapper jsonwrapper;
-
-    public JsonTypeDescriptor(final JsonWrapper jsonwrapper) {
+    public JsonTypeDescriptor() {
         super(Object.class, new MutableMutabilityPlan<Object>() {
             @Override
             protected Object deepCopyNotNull(Object value) {
-                return jsonwrapper.clone(value);
+                return JsonMapperInstance.clone(value);
             }
         });
-        this.jsonwrapper = jsonwrapper;
     }
 
     @Override
@@ -53,18 +50,18 @@ public class JsonTypeDescriptor extends AbstractTypeDescriptor<Object> implement
             return one.equals(another);
         }
 
-        return jsonwrapper.readObject(jsonwrapper.toJson(one)).equals(
-                jsonwrapper.readObject(jsonwrapper.toJson(another)));
+        return JsonMapperInstance.readObject(JsonMapperInstance.toJson(one)).equals(
+                JsonMapperInstance.readObject(JsonMapperInstance.toJson(another)));
     }
 
     @Override
     public String toString(Object value) {
-        return jsonwrapper.toJson(value);
+        return JsonMapperInstance.toJson(value);
     }
 
     @Override
     public Object fromString(String string) {
-        return jsonwrapper.fromJson(string, type);
+        return JsonMapperInstance.fromJson(string, type);
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -77,7 +74,7 @@ public class JsonTypeDescriptor extends AbstractTypeDescriptor<Object> implement
             return (X) toString(value);
         }
         if (Object.class.isAssignableFrom(type)) {
-            return (X) jsonwrapper.readObject(toString(value));
+            return (X) JsonMapperInstance.readObject(toString(value));
         }
         throw unknownUnwrap(type);
     }

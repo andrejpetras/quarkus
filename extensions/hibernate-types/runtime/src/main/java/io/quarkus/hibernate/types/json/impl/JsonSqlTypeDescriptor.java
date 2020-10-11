@@ -14,7 +14,7 @@ import org.hibernate.type.descriptor.sql.SqlTypeDescriptor;
  * @author Vlad Mihalcea
  *
  */
-public abstract class AbstractJsonSqlTypeDescriptor implements SqlTypeDescriptor {
+public abstract class JsonSqlTypeDescriptor implements SqlTypeDescriptor {
 
     @Override
     public boolean canBeRemapped() {

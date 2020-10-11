@@ -5,8 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import javax.json.JsonStructure;
-
 import org.hibernate.type.descriptor.ValueBinder;
 import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.JavaTypeDescriptor;
@@ -16,7 +14,7 @@ import org.hibernate.type.descriptor.sql.BasicBinder;
  * @author Vlad Mihalcea
  *
  */
-public class JsonBinarySqlTypeDescriptor extends AbstractJsonSqlTypeDescriptor {
+public class JsonBinarySqlTypeDescriptor extends JsonSqlTypeDescriptor {
 
     public static final JsonBinarySqlTypeDescriptor INSTANCE = new JsonBinarySqlTypeDescriptor();
 
@@ -30,13 +28,15 @@ public class JsonBinarySqlTypeDescriptor extends AbstractJsonSqlTypeDescriptor {
         return new BasicBinder<X>(javaTypeDescriptor, this) {
             @Override
             protected void doBind(PreparedStatement st, X value, int index, WrapperOptions options) throws SQLException {
-                st.setObject(index, javaTypeDescriptor.unwrap(value, JsonStructure.class, options), getSqlType());
+                st.setObject(index, javaTypeDescriptor.unwrap(value, JsonMapperInstance.getBinaryTypeClass(), options),
+                        getSqlType());
             }
 
             @Override
             protected void doBind(CallableStatement st, X value, String name, WrapperOptions options)
                     throws SQLException {
-                st.setObject(name, javaTypeDescriptor.unwrap(value, JsonStructure.class, options), getSqlType());
+                st.setObject(name, javaTypeDescriptor.unwrap(value, JsonMapperInstance.getBinaryTypeClass(), options),
+                        getSqlType());
             }
         };
     }

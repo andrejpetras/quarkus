@@ -1,12 +1,12 @@
-package io.quarkus.hibernate.types.json;
+package io.quarkus.hibernate.types.jsonb;
 
 import javax.json.JsonObject;
 
 import org.hibernate.type.AbstractSingleColumnStandardBasicType;
 
+import io.quarkus.hibernate.types.json.JsonTypes;
 import io.quarkus.hibernate.types.json.impl.JsonBinarySqlTypeDescriptor;
 import io.quarkus.hibernate.types.json.impl.JsonObjectTypeDescriptor;
-import io.quarkus.hibernate.types.json.impl.JsonWrapper;
 
 /**
  * Maps a JSON {@link JsonObject} object on a JSON column type that is managed via
@@ -25,7 +25,8 @@ import io.quarkus.hibernate.types.json.impl.JsonWrapper;
 public class JsonObjectBinaryType extends AbstractSingleColumnStandardBasicType<JsonObject> {
 
     public JsonObjectBinaryType() {
-        super(JsonBinarySqlTypeDescriptor.INSTANCE, new JsonObjectTypeDescriptor(JsonWrapper.INSTANCE));
+        super(JsonBinarySqlTypeDescriptor.INSTANCE,
+                new JsonObjectTypeDescriptor<JsonObject>(JsonObject.class));
     }
 
     public String getName() {

@@ -7,7 +7,6 @@ import org.hibernate.type.AbstractSingleColumnStandardBasicType;
 import org.hibernate.usertype.DynamicParameterizedType;
 
 import io.quarkus.hibernate.types.json.impl.JsonTypeDescriptor;
-import io.quarkus.hibernate.types.json.impl.JsonWrapper;
 
 /**
  * Maps any given Java object on a JSON column type that is managed via {@link java.sql.PreparedStatement#setBlob(int, Blob)} at
@@ -24,8 +23,7 @@ import io.quarkus.hibernate.types.json.impl.JsonWrapper;
 public class JsonBlobType extends AbstractSingleColumnStandardBasicType<Object> implements DynamicParameterizedType {
 
     public JsonBlobType() {
-        super(org.hibernate.type.descriptor.sql.BlobTypeDescriptor.DEFAULT,
-                new JsonTypeDescriptor(JsonWrapper.INSTANCE));
+        super(org.hibernate.type.descriptor.sql.BlobTypeDescriptor.DEFAULT, new JsonTypeDescriptor());
     }
 
     public String getName() {

@@ -60,7 +60,6 @@ public enum Capability {
      * Presence of SmallRye OpenTracing.
      */
     SMALLRYE_OPENTRACING,
-    HIBERNATE_TYPES,
     SPRING_WEB,
     SMALLRYE_OPENAPI;
 
