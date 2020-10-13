@@ -6,13 +6,13 @@ public interface JsonMapper {
 
     Class<?> getBinaryTypeClass();
 
-    <T> T fromJson(String string, Class<T> clazz);
-
     <T> T fromJson(String string, Type type);
 
     String toJson(Object value);
 
     Object readObject(String value);
+
+    Object toJsonType(String value);
 
     <T> T clone(T value);
 }

@@ -7,10 +7,6 @@ import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.JavaTypeDescriptor;
 import org.hibernate.type.descriptor.sql.BasicBinder;
 
-/**
- * @author Vlad Mihalcea
- *
- */
 public class JsonStringSqlTypeDescriptor extends JsonSqlTypeDescriptor {
 
     public static final JsonStringSqlTypeDescriptor INSTANCE = new JsonStringSqlTypeDescriptor();

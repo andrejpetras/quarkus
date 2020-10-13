@@ -60,6 +60,10 @@ public class JacksonMapper implements JsonMapper {
         }
     }
 
+    public JsonNode toJsonType(String value) {
+        return readObject(value);
+    }
+
     public <T> T clone(T value) {
         try {
             return objectMapper.treeToValue(objectMapper.valueToTree(value), (Class<T>) value.getClass());

@@ -1,6 +1,8 @@
 package io.quarkus.hibernate.types.jsonb;
 
 import javax.json.JsonObject;
+import javax.json.JsonStructure;
+import javax.json.JsonValue;
 
 import org.hibernate.type.AbstractSingleColumnStandardBasicType;
 
@@ -9,7 +11,7 @@ import io.quarkus.hibernate.types.json.impl.JsonObjectTypeDescriptor;
 import io.quarkus.hibernate.types.json.impl.JsonStringSqlTypeDescriptor;
 
 /**
- * Maps a object {@link JsonObject} object on a JSON column type that is managed via
+ * Maps a object {@link JsonStructure} object on a JSON column type that is managed via
  * {@link java.sql.PreparedStatement#setString(int, String)} at JDBC Driver level. For instance, if you are using MySQL, you
  * should be using {@link JsonObjectStringType} to map the {@code json} column type to a Jackson {@link JsonObject} object.
  * <p>
@@ -20,11 +22,11 @@ import io.quarkus.hibernate.types.json.impl.JsonStringSqlTypeDescriptor;
  * @author Vlad Mihalcea
  *
  */
-public class JsonObjectStringType extends AbstractSingleColumnStandardBasicType<JsonObject> {
+public class JsonObjectStringType extends AbstractSingleColumnStandardBasicType<JsonStructure> {
 
     public JsonObjectStringType() {
         super(JsonStringSqlTypeDescriptor.INSTANCE,
-                new JsonObjectTypeDescriptor<JsonObject>(JsonObject.class));
+                new JsonObjectTypeDescriptor<JsonStructure>(JsonStructure.class));
     }
 
     @Override

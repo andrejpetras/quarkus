@@ -24,21 +24,11 @@ public class JsonMapperInstance {
         if (tmp == null) {
             throw new IllegalStateException("Missing JsonMapper instance [jsonb,jackson,...]");
         }
-        System.out.println("######## " + tmp.getClass());
         return tmp;
     }
 
     public static Class<?> getBinaryTypeClass() {
         return jsonMapper.getBinaryTypeClass();
-    }
-
-    public static <T> T fromJson(String string, Class<T> clazz) {
-        try {
-            return jsonMapper.fromJson(string, clazz);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("The given string value: " + string + " cannot be transformed to Json object",
-                    e);
-        }
     }
 
     public static <T> T fromJson(String string, Type type) {
@@ -72,6 +62,18 @@ public class JsonMapperInstance {
             return jsonMapper.clone(value);
         } catch (Exception e) {
             throw new IllegalArgumentException("The given Json object value: " + value + " cannot be clone.", e);
+        }
+    }
+
+    public static boolean areJsonEqual(Object one, Object another) {
+        return readObject(toJson(one)).equals(readObject(toJson(another)));
+    }
+
+    public static Object toJsonType(Object value) {
+        try {
+            return jsonMapper.toJsonType(jsonMapper.toJson(value));
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
         }
     }
 }

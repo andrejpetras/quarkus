@@ -38,8 +38,7 @@ public class JsonObjectTypeDescriptor<T> extends AbstractTypeDescriptor<T> {
         if (one == null || another == null) {
             return false;
         }
-        return JsonMapperInstance.readObject(JsonMapperInstance.toJson(one)).equals(
-                JsonMapperInstance.readObject(JsonMapperInstance.toJson(another)));
+        return JsonMapperInstance.areJsonEqual(one, another);
     }
 
     @Override

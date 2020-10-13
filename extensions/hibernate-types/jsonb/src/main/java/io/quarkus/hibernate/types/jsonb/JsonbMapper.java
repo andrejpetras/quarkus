@@ -4,9 +4,9 @@ import java.io.StringReader;
 import java.lang.reflect.Type;
 
 import javax.json.Json;
-import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonStructure;
+import javax.json.JsonValue;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbException;
 
@@ -25,16 +25,7 @@ public class JsonbMapper implements JsonMapper {
 
     @Override
     public Class<?> getBinaryTypeClass() {
-        return JsonStructure.class;
-    }
-
-    public <T> T fromJson(String string, Class<T> clazz) {
-        try {
-            return jsonb.fromJson(string, clazz);
-        } catch (JsonbException e) {
-            throw new IllegalArgumentException("The given string value: " + string + " cannot be transformed to Json object",
-                    e);
-        }
+        return JsonValue.class;
     }
 
     public <T> T fromJson(String string, Type type) {
@@ -55,13 +46,17 @@ public class JsonbMapper implements JsonMapper {
         }
     }
 
-    public JsonObject readObject(String value) {
+    public JsonStructure readObject(String value) {
         try {
             JsonReader reader = Json.createReader(new StringReader(value));
-            return reader.readObject();
+            return reader.read();
         } catch (JsonbException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    public JsonStructure toJsonType(String value) {
+        return new JsonStructureImpl(readObject(value));
     }
 
     public <T> T clone(T value) {
@@ -69,6 +64,25 @@ public class JsonbMapper implements JsonMapper {
             return jsonb.fromJson(jsonb.toJson(value), (Class<T>) value.getClass());
         } catch (JsonbException e) {
             throw new IllegalArgumentException("The given Json object value: " + value + " cannot be clone.", e);
+        }
+    }
+
+    public static class JsonStructureImpl implements JsonStructure {
+
+        private JsonStructure data;
+
+        public JsonStructureImpl(JsonStructure data) {
+            this.data = data;
+        }
+
+        @Override
+        public ValueType getValueType() {
+            return data.getValueType();
+        }
+
+        @Override
+        public String toString() {
+            return data.toString();
         }
     }
 }

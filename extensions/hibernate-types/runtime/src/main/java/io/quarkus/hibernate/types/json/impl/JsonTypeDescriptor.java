@@ -49,9 +49,7 @@ public class JsonTypeDescriptor extends AbstractTypeDescriptor<Object> implement
         if (one instanceof String && another instanceof String) {
             return one.equals(another);
         }
-
-        return JsonMapperInstance.readObject(JsonMapperInstance.toJson(one)).equals(
-                JsonMapperInstance.readObject(JsonMapperInstance.toJson(another)));
+        return JsonMapperInstance.areJsonEqual(one, another);
     }
 
     @Override
@@ -74,7 +72,7 @@ public class JsonTypeDescriptor extends AbstractTypeDescriptor<Object> implement
             return (X) toString(value);
         }
         if (Object.class.isAssignableFrom(type)) {
-            return (X) JsonMapperInstance.readObject(toString(value));
+            return (X) JsonMapperInstance.toJsonType(value);
         }
         throw unknownUnwrap(type);
     }
