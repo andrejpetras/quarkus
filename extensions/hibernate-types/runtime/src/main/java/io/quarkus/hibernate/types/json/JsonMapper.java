@@ -1,4 +1,4 @@
-package io.quarkus.hibernate.types.json.impl;
+package io.quarkus.hibernate.types.json;
 
 import java.lang.reflect.Type;
 

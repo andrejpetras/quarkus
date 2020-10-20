@@ -4,6 +4,7 @@ import java.lang.reflect.Type;
 
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.ArcContainer;
+import io.quarkus.hibernate.types.json.JsonMapper;
 
 /**
  * Wraps a JSON mapper {@link JsonMapper} so that you can supply your own {@link JsonMapper} reference.
@@ -22,7 +23,7 @@ public class JsonMapperInstance {
             tmp = container.instance(JsonMapper.class).get();
         }
         if (tmp == null) {
-            throw new IllegalStateException("Missing JsonMapper instance [jsonb,jackson,...]");
+            throw new IllegalStateException("Missing JsonMapper instance implementation [jsonb,jackson,...]");
         }
         return tmp;
     }

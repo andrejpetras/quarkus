@@ -13,12 +13,6 @@ import io.quarkus.hibernate.types.json.impl.JsonTypeDescriptor;
  * JDBC Driver level.
  * <p>
  * If you are using Oracle, you should use this {@link JsonBlobType} to map a {@code BLOB} column type storing JSON.
- * <p>
- * For more details about how to use it, check out <a href="https://vladmihalcea.com/oracle-json-jpa-hibernate/">this
- * article</a> on <a href="https://vladmihalcea.com/">vladmihalcea.com</a>.
- *
- * @author Vlad Mihalcea
- *
  */
 public class JsonBlobType extends AbstractSingleColumnStandardBasicType<Object> implements DynamicParameterizedType {
 

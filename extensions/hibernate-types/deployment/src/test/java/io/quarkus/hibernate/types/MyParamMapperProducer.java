@@ -1,20 +1,21 @@
-package io.quarkus.hibernate.types.jsonb;
+package io.quarkus.hibernate.types;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Singleton;
-import javax.json.bind.Jsonb;
 
 import io.quarkus.arc.DefaultBean;
+import io.quarkus.arc.Unremovable;
 import io.quarkus.hibernate.types.json.JsonMapper;
 
 @Singleton
-public class JsonbMapperProducer {
+public class MyParamMapperProducer {
 
     @Produces
     @Singleton
     @DefaultBean
-    public JsonMapper jsonb(Jsonb jsonb) {
-        return new JsonbMapper(jsonb);
+    @Unremovable
+    public JsonMapper jsonb() {
+        return new MyParamMapper();
     }
 
 }

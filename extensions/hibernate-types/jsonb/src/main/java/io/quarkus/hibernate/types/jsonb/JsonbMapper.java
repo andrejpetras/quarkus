@@ -10,7 +10,7 @@ import javax.json.JsonValue;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbException;
 
-import io.quarkus.hibernate.types.json.impl.JsonMapper;
+import io.quarkus.hibernate.types.json.JsonMapper;
 
 /**
  * Wraps a JSON mapper {@link Jsonb} so that you can supply your own {@link Jsonb} reference.

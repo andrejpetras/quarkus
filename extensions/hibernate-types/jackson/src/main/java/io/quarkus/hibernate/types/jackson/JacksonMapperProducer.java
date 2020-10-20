@@ -6,7 +6,7 @@ import javax.inject.Singleton;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.arc.DefaultBean;
-import io.quarkus.hibernate.types.json.impl.JsonMapper;
+import io.quarkus.hibernate.types.json.JsonMapper;
 
 @Singleton
 public class JacksonMapperProducer {

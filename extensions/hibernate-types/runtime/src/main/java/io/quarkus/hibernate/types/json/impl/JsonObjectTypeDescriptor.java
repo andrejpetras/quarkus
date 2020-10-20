@@ -6,9 +6,6 @@ import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.AbstractTypeDescriptor;
 import org.hibernate.type.descriptor.java.MutableMutabilityPlan;
 
-/**
- * @author Vlad Mihalcea
- */
 public class JsonObjectTypeDescriptor<T> extends AbstractTypeDescriptor<T> {
 
     public JsonObjectTypeDescriptor(Class<T> clazz) {

@@ -10,10 +10,6 @@ import org.hibernate.type.descriptor.java.JavaTypeDescriptor;
 import org.hibernate.type.descriptor.sql.BasicExtractor;
 import org.hibernate.type.descriptor.sql.SqlTypeDescriptor;
 
-/**
- * @author Vlad Mihalcea
- *
- */
 public abstract class JsonSqlTypeDescriptor implements SqlTypeDescriptor {
 
     @Override
