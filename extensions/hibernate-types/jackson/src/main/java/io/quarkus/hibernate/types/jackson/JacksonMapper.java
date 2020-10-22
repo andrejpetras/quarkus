@@ -60,7 +60,7 @@ public class JacksonMapper implements JsonMapper {
         }
     }
 
-    public JsonNode toJsonType(String value) {
+    public JsonNode toType(String value) {
         return readObject(value);
     }
 

@@ -660,6 +660,26 @@
             </dependency>
             <dependency>
                 <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-hibernate-types</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-hibernate-types-deployment</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-hibernate-types-jsonb</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-hibernate-types-jackson</artifactId>
+                <version>${project.version}</version>
+            </dependency> 
+            <dependency>
+                <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-panache-common</artifactId>
                 <version>${project.version}</version>
             </dependency>

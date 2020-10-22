@@ -12,7 +12,7 @@ public interface JsonMapper {
 
     Object readObject(String value);
 
-    Object toJsonType(String value);
+    Object toType(String value);
 
     <T> T clone(T value);
 }

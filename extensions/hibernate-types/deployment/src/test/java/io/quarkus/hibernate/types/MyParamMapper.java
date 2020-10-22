@@ -38,7 +38,7 @@ public class MyParamMapper implements JsonMapper {
     }
 
     @Override
-    public Object toJsonType(String value) {
+    public Object toType(String value) {
         return readObject(value);
     }
 

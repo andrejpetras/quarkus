@@ -55,7 +55,7 @@ public class JsonbMapper implements JsonMapper {
         }
     }
 
-    public JsonStructure toJsonType(String value) {
+    public JsonStructure toType(String value) {
         return new JsonStructureImpl(readObject(value));
     }
 

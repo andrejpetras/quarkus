@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import io.quarkus.arc.Arc;
 import io.quarkus.test.QuarkusUnitTest;
 
-public class JsonMapperTestCase {
+public class CustomMapperTestCase {
 
     @RegisterExtension
     final static QuarkusUnitTest TEST = new QuarkusUnitTest()
