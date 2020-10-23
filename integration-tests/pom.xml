@@ -57,6 +57,7 @@
         <module>hibernate-search-elasticsearch</module>
         <module>hibernate-tenancy</module>
         <module>hibernate-orm-envers</module>
+        <module>hibernate-types-jackson-postgresql</module>
         <module>vertx-http</module>
         <module>vertx-web</module>
         <module>vertx</module>
